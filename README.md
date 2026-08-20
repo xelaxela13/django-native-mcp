@@ -4,6 +4,8 @@ A small Django-native MCP application and tool registration framework inspired b
 It delegates protocol handling, schemas, validation, serialization, stdio, and Streamable HTTP
 to the official [`mcp` Python SDK](https://github.com/modelcontextprotocol/python-sdk).
 
+### This is not another wrapper around FastMCP, the dependencies are only native Python SDK
+
 ## Installation
 
 ```bash
