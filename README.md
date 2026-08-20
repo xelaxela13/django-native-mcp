@@ -127,6 +127,12 @@ async with MCPTestClient(app) as client:
     result = await client.call_tool("orders.get_order", {"order_id": 1})
 ```
 
+## End-to-end example
+
+The [`example/`](example/) directory contains a runnable Django project using the built-in auth
+`User`, a Streamable HTTP MCP endpoint, and a standalone OpenAI Responses API client that discovers
+and calls the Django tool through MCP.
+
 ## Architecture
 
 ```text
