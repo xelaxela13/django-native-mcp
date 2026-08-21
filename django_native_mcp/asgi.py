@@ -11,6 +11,52 @@ ASGIApp = Callable[
 ]
 
 
+class AuthenticatedMCPApplication:
+    """Protect an MCP HTTP application with the configured bearer authenticators."""
+
+    def __init__(self, *, mcp: ASGIApp) -> None:
+        self.mcp = mcp
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.mcp, name)
+
+    async def __call__(self, scope: MutableMapping[str, Any], receive: Any, send: Any) -> None:
+        if scope["type"] != "http":
+            await self.mcp(scope, receive, send)
+            return
+        from .conf import get_authentication_classes
+
+        if get_authentication_classes() is None:
+            await self.mcp(scope, receive, send)
+            return
+        headers = dict(scope.get("headers", []))
+        authorization = headers.get(b"authorization", b"").decode("latin-1")
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not token:
+            await self._unauthorized(send)
+            return
+        from .authentication import authenticate_mcp_token
+
+        user = await authenticate_mcp_token(token)
+        if user is None:
+            await self._unauthorized(send)
+            return
+        authenticated_scope = dict(scope)
+        authenticated_scope["user"] = user
+        await self.mcp(authenticated_scope, receive, send)
+
+    @staticmethod
+    async def _unauthorized(send: Any) -> None:
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 401,
+                "headers": [(b"www-authenticate", b"Bearer")],
+            }
+        )
+        await send({"type": "http.response.body", "body": b"Unauthorized"})
+
+
 class MCPApplication:
     """Route one ASGI path to MCP and all remaining traffic to Django."""
 

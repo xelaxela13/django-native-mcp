@@ -5,6 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = "tests-only"
 USE_TZ = True
 INSTALLED_APPS = [
+    "django.contrib.auth",
     "django.contrib.contenttypes",
     "django_native_mcp",
     "tests.test_apps.inventory.apps.InventoryConfig",

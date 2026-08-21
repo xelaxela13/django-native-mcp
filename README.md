@@ -27,6 +27,13 @@ DJANGO_NATIVE_MCP = {
 }
 ```
 
+Streamable HTTP MCP is protected by bearer tokens by default. The package provides an
+`MCPToken` model in the Django admin; its generated 40-character key is sent as
+`Authorization: Bearer <key>`. Tokens support `last_used` tracking and optional expiration.
+Set `DJANGO_NATIVE_MCP["DEFAULT_AUTHENTICATION_CLASSES"]` to a list of dotted backend paths to
+replace the default `django_native_mcp.authentication.MCPTokenBackend`. Set it to `None` or `[]`
+to make the HTTP MCP endpoint public.
+
 Create the application:
 
 ```python

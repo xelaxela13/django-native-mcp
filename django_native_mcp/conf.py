@@ -6,10 +6,25 @@ from django.utils.module_loading import import_string
 from .exceptions import AppNotConfigured
 
 SETTING_NAME = "DJANGO_NATIVE_MCP"
+DEFAULT_AUTHENTICATION_CLASSES = ("django_native_mcp.authentication.MCPTokenBackend",)
 
 
 def get_config() -> dict[str, Any]:
     return dict(getattr(settings, SETTING_NAME, {}))
+
+
+def get_authentication_classes() -> tuple[str, ...] | None:
+    config = get_config()
+    if "DEFAULT_AUTHENTICATION_CLASSES" not in config:
+        return DEFAULT_AUTHENTICATION_CLASSES
+    value = config["DEFAULT_AUTHENTICATION_CLASSES"]
+    if value is None or value == []:
+        return None
+    if not isinstance(value, (list, tuple)) or not all(isinstance(item, str) for item in value):
+        raise TypeError(
+            f'{SETTING_NAME}["DEFAULT_AUTHENTICATION_CLASSES"] must be a list of import paths.'
+        )
+    return tuple(value)
 
 
 def load_configured_app(*, autodiscover: bool | None = None) -> Any:

@@ -43,6 +43,8 @@ INSTALLED_APPS = [
 
 DJANGO_NATIVE_MCP = {
     "APP": "config.mcp:app",
+    # The example is intentionally public; production defaults to bearer-token auth.
+    "DEFAULT_AUTHENTICATION_CLASSES": None,
 }
 
 MIDDLEWARE = [

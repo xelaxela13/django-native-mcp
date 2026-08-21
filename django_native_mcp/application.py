@@ -164,10 +164,17 @@ class MCP:
         json_response: bool = False,
         stateless_http: bool = False,
     ) -> Any:
-        return self.server.streamable_http_app(
-            streamable_http_path=streamable_http_path,
-            json_response=json_response,
-            stateless_http=stateless_http,
+        from .asgi import AuthenticatedMCPApplication
+
+        return AuthenticatedMCPApplication(
+            mcp=cast(
+                Any,
+                self.server.streamable_http_app(
+                    streamable_http_path=streamable_http_path,
+                    json_response=json_response,
+                    stateless_http=stateless_http,
+                ),
+            )
         )
 
     def run(self, transport: str = "stdio", **kwargs: Any) -> None:

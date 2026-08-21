@@ -3,6 +3,7 @@ from typing import Any
 
 import httpx2
 import pytest
+from django.test import override_settings
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 
@@ -11,6 +12,7 @@ from django_native_mcp.asgi import MCPApplication
 
 
 @pytest.mark.asyncio
+@override_settings(DJANGO_NATIVE_MCP={"DEFAULT_AUTHENTICATION_CLASSES": None})
 async def test_official_streamable_http_app_lists_and_calls_tools() -> None:
     mcp = MCP("http")
 
