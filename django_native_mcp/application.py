@@ -42,27 +42,25 @@ class MCP:
             raise AppFinalized(f"MCP application '{self.name}' has been finalized.")
 
     @overload
-    def tool(self, function: FunctionT, /) -> FunctionT:
-        ...
+    def tool(self, function: FunctionT, /) -> FunctionT: ...
 
     @overload
     def tool(
-            self,
-            function: None = None,
-            /,
-            *,
-            name: str | None = None,
-            description: str | None = None,
-    ) -> Callable[[FunctionT], FunctionT]:
-        ...
+        self,
+        function: None = None,
+        /,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+    ) -> Callable[[FunctionT], FunctionT]: ...
 
     def tool(
-            self,
-            function: FunctionT | None = None,
-            /,
-            *,
-            name: str | None = None,
-            description: str | None = None,
+        self,
+        function: FunctionT | None = None,
+        /,
+        *,
+        name: str | None = None,
+        description: str | None = None,
     ) -> FunctionT | Callable[[FunctionT], FunctionT]:
         """Register an async tool directly on this application."""
 
@@ -161,12 +159,12 @@ class MCP:
         return self.create_server()
 
     def asgi_app(
-            self,
-            *,
-            streamable_http_path: str = "/mcp",
-            json_response: bool = False,
-            stateless_http: bool = False,
-            transport_security: TransportSecuritySettings | None = None
+        self,
+        *,
+        streamable_http_path: str = "/mcp",
+        json_response: bool = False,
+        stateless_http: bool = False,
+        transport_security: TransportSecuritySettings | None = None,
     ) -> Any:
         from .asgi import AuthenticatedMCPApplication
         from .conf import get_streamable_http_settings

@@ -86,7 +86,7 @@ async def test_streamable_http_allows_configured_host_and_origin() -> None:
     async with application.router.lifespan_context(application):
         async with httpx2.AsyncClient(
             transport=httpx2.ASGITransport(app=application),
-        base_url="https://backend.example.com",
+            base_url="https://backend.example.com",
         ) as client:
             response = await client.head("/mcp", headers={"Origin": "https://backend.example.com"})
 
