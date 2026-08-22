@@ -6,6 +6,7 @@ from typing import Any, TypeVar, cast, overload
 from django.apps import apps
 from django.core.exceptions import AppRegistryNotReady
 from mcp.server import MCPServer
+from mcp.server.transport_security import TransportSecuritySettings
 
 from ._shared import DeferredToolDefinition, shared_tool_store
 from .decorators import validate_tool
@@ -41,25 +42,27 @@ class MCP:
             raise AppFinalized(f"MCP application '{self.name}' has been finalized.")
 
     @overload
-    def tool(self, function: FunctionT, /) -> FunctionT: ...
+    def tool(self, function: FunctionT, /) -> FunctionT:
+        ...
 
     @overload
     def tool(
-        self,
-        function: None = None,
-        /,
-        *,
-        name: str | None = None,
-        description: str | None = None,
-    ) -> Callable[[FunctionT], FunctionT]: ...
+            self,
+            function: None = None,
+            /,
+            *,
+            name: str | None = None,
+            description: str | None = None,
+    ) -> Callable[[FunctionT], FunctionT]:
+        ...
 
     def tool(
-        self,
-        function: FunctionT | None = None,
-        /,
-        *,
-        name: str | None = None,
-        description: str | None = None,
+            self,
+            function: FunctionT | None = None,
+            /,
+            *,
+            name: str | None = None,
+            description: str | None = None,
     ) -> FunctionT | Callable[[FunctionT], FunctionT]:
         """Register an async tool directly on this application."""
 
@@ -158,22 +161,30 @@ class MCP:
         return self.create_server()
 
     def asgi_app(
-        self,
-        *,
-        streamable_http_path: str = "/mcp",
-        json_response: bool = False,
-        stateless_http: bool = False,
+            self,
+            *,
+            streamable_http_path: str = "/mcp",
+            json_response: bool = False,
+            stateless_http: bool = False,
+            transport_security: TransportSecuritySettings | None = None
     ) -> Any:
         from .asgi import AuthenticatedMCPApplication
+        from .conf import get_streamable_http_settings
+
+        host, transport_security_settings = get_streamable_http_settings()
+        streamable_http_kwargs: dict[str, Any] = {
+            "streamable_http_path": streamable_http_path,
+            "json_response": json_response,
+            "stateless_http": stateless_http,
+            "transport_security": transport_security or transport_security_settings,
+        }
+        if host is not None:
+            streamable_http_kwargs["host"] = host
 
         return AuthenticatedMCPApplication(
             mcp=cast(
                 Any,
-                self.server.streamable_http_app(
-                    streamable_http_path=streamable_http_path,
-                    json_response=json_response,
-                    stateless_http=stateless_http,
-                ),
+                self.server.streamable_http_app(**streamable_http_kwargs),
             )
         )
 

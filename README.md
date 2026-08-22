@@ -27,6 +27,21 @@ DJANGO_NATIVE_MCP = {
 }
 ```
 
+For a public Streamable HTTP host, configure the SDK host and DNS rebinding
+allowlists explicitly:
+
+    DJANGO_NATIVE_MCP = {
+        "APP": "config.mcp:app",
+        "HOST": "0.0.0.0",
+        "TRANSPORT_SECURITY_SETTINGS": {
+            "ENABLE_DNS_REBINDING_PROTECTION": True,
+            "ALLOWED_HOSTS": ["mysite.com"],
+            "ALLOWED_ORIGINS": ["https://mysite.com"],
+        },
+    }
+
+The optional settings preserve the official SDK defaults when omitted.
+
 Streamable HTTP MCP is protected by bearer tokens by default. The package provides an
 `MCPToken` model in the Django admin; its generated 40-character key is sent as
 `Authorization: Bearer <key>`. Tokens support `last_used` tracking and optional expiration.
