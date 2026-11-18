@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Download release distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: release-distributions
           path: dist/
