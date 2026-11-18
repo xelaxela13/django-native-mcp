@@ -104,6 +104,35 @@ async def health() -> dict:
 `@app.tool` binds immediately to one application. `@shared_tool` remains application-independent
 until autodiscovery binds it.
 
+## Django permissions
+
+Both decorators accept an optional iterable of Django permission names:
+
+```python
+@shared_tool(permissions=["orders.view_order", "orders.change_order"])
+async def update_order(order_id: int) -> dict: ...
+
+
+@app.tool(permissions=["auth.view_user"])
+async def count_users() -> int: ...
+```
+
+Every listed permission is required. Before executing the tool, the server calls
+`await user.ahas_perms(permissions)` on the user authenticated for the current HTTP request.
+Django's configured `AUTHENTICATION_BACKENDS` determine permission access, including user
+permissions, group permissions, and active superuser behavior. MCP authentication backends
+authenticate tokens; Django authorization backends evaluate permissions.
+
+Omitting `permissions`, passing `None`, or passing an empty iterable preserves unrestricted
+tool access after transport authentication. Permission names are copied into an immutable tuple
+at registration. The decorators return the original functions and preserve their schemas.
+
+A protected tool returns an MCP tool error with `Permission denied.` when the user is absent,
+anonymous, or lacks any required permission; its body does not execute. Making HTTP public
+does not bypass this check. Stdio, `mcp_call`, and the in-process test client have no authenticated
+HTTP user and cannot execute protected tools. Direct Python calls to the original decorated
+function do not pass through MCP authorization. Tool listing remains common to all users.
+
 ## Streamable HTTP with Django
 
 The official SDK ASGI app can be served alone:
@@ -181,3 +210,15 @@ Django models and does not infer permissions from them.
 ## License
 
 MIT
+
+## Publishing to PyPI
+
+The existing `.github/workflows/release.yml` builds and checks distributions, then publishes
+through PyPI Trusted Publishing when a GitHub Release is published. Configure a Trusted
+Publisher for PyPI project `django-native-mcp`, GitHub owner `xelaxela13`, repository
+`django-native-mcp`, workflow `release.yml`, and GitHub environment `pypi`.
+
+For version `0.1.3`, commit the verified release changes and create the tag `v0.1.3` on that
+commit. Publish a GitHub Release for that tag using the notes in `CHANGELOG.md`. The tag must
+contain `version = "0.1.3"` in `pyproject.toml`. Publication is a separate action; building the
+package locally does not publish it.

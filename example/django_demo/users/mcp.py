@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django_native_mcp import shared_tool
 
 
-@shared_tool
+@shared_tool(permissions=["auth.view_user"])
 async def get_user_name_by_email(email: str) -> dict[str, bool | str]:
     """Find a Django user by email and return the user's display name."""
     user_model = get_user_model()

@@ -9,3 +9,4 @@ class ToolDefinition:
     function: Callable[..., Any]
     description: str | None
     module: str
+    permissions: tuple[str, ...] = ()

@@ -9,6 +9,7 @@ class DeferredToolDefinition:
     explicit_name: str | None
     description: str | None
     module: str
+    permissions: tuple[str, ...] = ()
 
 
 class SharedToolStore:

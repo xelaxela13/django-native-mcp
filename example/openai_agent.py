@@ -1,9 +1,12 @@
 import asyncio
 import json
+import os
 import re
 from typing import Any
 
+import httpx2
 from mcp import Client
+from mcp.client.streamable_http import streamable_http_client
 from openai import AsyncOpenAI
 
 OPENAI_API_KEY = ""
@@ -39,10 +42,16 @@ def serialize_tool_result(result: Any) -> str:
 async def main() -> None:
     if not OPENAI_API_KEY:
         raise SystemExit("Set OPENAI_API_KEY at the top of openai_agent.py first.")
+    mcp_token = os.environ.get("MCP_TOKEN")
+    if not mcp_token:
+        raise SystemExit("Set MCP_TOKEN to a bearer token for a user with auth.view_user.")
 
     openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
-    async with Client(MCP_URL) as mcp_client:
+    async with (
+        httpx2.AsyncClient(headers={"Authorization": f"Bearer {mcp_token}"}) as http_client,
+        Client(streamable_http_client(MCP_URL, http_client=http_client)) as mcp_client,
+    ):
         available_tools = await mcp_client.list_tools()
         target = next(
             (tool for tool in available_tools.tools if tool.name == TARGET_MCP_TOOL),

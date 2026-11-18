@@ -9,7 +9,7 @@ from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 
 from ._shared import DeferredToolDefinition, shared_tool_store
-from .decorators import validate_tool
+from .decorators import normalize_permissions, validate_tool
 from .definitions import ToolDefinition
 from .exceptions import AppFinalized, InvalidToolError
 from .registry import ToolRegistry
@@ -52,6 +52,7 @@ class MCP:
         *,
         name: str | None = None,
         description: str | None = None,
+        permissions: Iterable[str] | None = None,
     ) -> Callable[[FunctionT], FunctionT]: ...
 
     def tool(
@@ -61,6 +62,7 @@ class MCP:
         *,
         name: str | None = None,
         description: str | None = None,
+        permissions: Iterable[str] | None = None,
     ) -> FunctionT | Callable[[FunctionT], FunctionT]:
         """Register an async tool directly on this application."""
 
@@ -74,6 +76,7 @@ class MCP:
                     function=target,
                     description=description if description is not None else inspect.getdoc(target),
                     module=target.__module__,
+                    permissions=normalize_permissions(permissions),
                 )
             )
             logger.debug("Registered tool %s", tool_name)
@@ -106,6 +109,7 @@ class MCP:
                     function=deferred.function,
                     description=deferred.description,
                     module=deferred.module,
+                    permissions=deferred.permissions,
                 )
             )
             self._bound_shared_functions.add(function_id)
